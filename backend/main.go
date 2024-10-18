@@ -3,13 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"net/http"
 	"os"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
 	r := gin.Default()
 
 	r.GET("/ping", func(c *gin.Context) {
@@ -86,8 +89,21 @@ func main() {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid data format for low"})
 				return
 			}
+			highFloat, err := strconv.ParseFloat(high, 64)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid data format for high"})
+				return
+			}
 
-			c.JSON(http.StatusOK, gin.H{"symbol": symbol, "high": high, "low": low})
+			lowFloat, err := strconv.ParseFloat(low, 64)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid data format for low"})
+				return
+			}
+
+			average := (highFloat + lowFloat) / 2
+
+			c.JSON(http.StatusOK, gin.H{"symbol": symbol, "high": highFloat, "low": lowFloat, "average": average})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "No data found in values"})
 		}
@@ -97,4 +113,5 @@ func main() {
 	fmt.Println("Everything is working fine")
 
 	r.Run() // Listen on localhost:8080
+
 }
